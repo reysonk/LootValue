@@ -32,8 +32,8 @@ namespace LootValue
 		public static int GetFleaValue(Item item)
 		{
 
-			if (!item.Template.CanSellOnRagfair || !item.MarkedAsSpawnedInSession)
-			{
+            if (!item.Template.CanSellOnRagfair || !item.MarkedAsSpawnedInSession)
+            {
 				return 0;
 			}
 
@@ -310,7 +310,7 @@ namespace LootValue
         public static int GetTraderValue(Item item)
         {
 
-            if (item.Template.CanSellOnRagfair || item.MarkedAsSpawnedInSession)
+            if (item.MarkedAsSpawnedInSession && item.Template.CanSellOnRagfair)
             {
                 return 0;
             }
