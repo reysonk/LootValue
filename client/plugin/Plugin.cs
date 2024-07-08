@@ -35,8 +35,8 @@ namespace LootValue
 		}
 
 		internal static ConfigEntry<bool> EnableQuickSell;
-		internal static ConfigEntry<bool> SellSimilarItems;
-		internal static ConfigEntry<bool> SellOnlySimilarItemsFiR;
+        internal static ConfigEntry<bool> EnableQuickSellHint;
+        internal static ConfigEntry<bool> SellSimilarItems;
 		internal static ConfigEntry<bool> OneButtonQuickSell;
 		internal static ConfigEntry<bool> SellToTraderIfWeaponIsNonOperational;
 		internal static ConfigEntry<bool> SellToTraderBelowProfitThresholdEnabled;
@@ -75,8 +75,8 @@ namespace LootValue
 			// General: Quick Sell
 			EnableQuickSell = Config.Bind("1. Quick Sell", "0. Enable quick sell", true, "Sell any item(s) instantly using the key combination described in 'One button quick sell'.");
 
-			// General -> Quick Sell:
-			OneButtonQuickSell = Config.Bind("1. Quick Sell", "1. One button quick sell", true,
+            // General -> Quick Sell:
+            OneButtonQuickSell = Config.Bind("1. Quick Sell", "1. One button quick sell", true,
 @"If disabled: 
 [Alt + Shift + Left Click] sells to trader, 
 [Alt + Shift + Right Click] sells to flea market
@@ -85,8 +85,8 @@ If enabled:
 [Alt + Shift + Left Click] sells to either depending on who pays more");
 
 			SellSimilarItems = Config.Bind("1. Quick Sell", "2. Sell all similar items in one go", false, "If you sell one item and have multiple of the same, they will all be sold simultaneously.");
-			SellOnlySimilarItemsFiR = Config.Bind("1. Quick Sell", "3. Only sell similar items if they are all FiR", false, "If this is enabled, sell multiple will only work select FiR items.");
-			IgnoreFleaMaxOfferCount = Config.Bind("1. Quick Sell", "4. Ignore flea max offer count", false);
+            EnableQuickSellHint = Config.Bind("1. Quick Sell", "3. Enable tooltip hint", true, "Show or hide the hint in the quick sale tooltip.");
+            IgnoreFleaMaxOfferCount = Config.Bind("1. Quick Sell", "4. Ignore flea max offer count", false);
 			SellToTraderIfWeaponIsNonOperational = Config.Bind("1. Quick Sell", "5. Sell to trader if item is weapon and non operational", false);
 			SellToTraderBelowProfitThresholdEnabled = Config.Bind("1. Quick Sell", "6. Sell to trader if flea market price below threshold enabled", false);
 			SellToTraderProfitThreshold = Config.Bind("1. Quick Sell", "6.1. Flea market profit threshold", 0,
@@ -97,7 +97,7 @@ If enabled:
 			ReducePriceInFleaForBrokenItem = Config.Bind("1. Quick Sell", "8. Reduce flea market offer relative to missing durability of item", true,
 				"This means if any item that has durability, i.e: IFAK, has 200/300 (66% durability remaining), it's flea market price will be reduced by 33%. This applies to most of things that have a durability bar.");
 
-		}
+        }
 	}
 
 	internal class TraderPatch : ModulePatch

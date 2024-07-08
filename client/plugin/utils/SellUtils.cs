@@ -107,17 +107,26 @@ namespace LootValue
 			{
 
 				if (displayWarning)
-					NotificationManagerClass.DisplayWarningNotification("Quicksell: Flea market is not available yet.");
+					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Барахолка пока недоступна!");
 
 				return false;
 			}
 
-			// we need to check if the base item is sellable
-			if (!item.Template.CanSellOnRagfair)
+            if (!item.MarkedAsSpawnedInSession)
+            {
+
+                if (displayWarning)
+                    NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Предмет не найден в рейде, продажа недоступна!");
+
+                return false;
+            }
+
+            // we need to check if the base item is sellable
+            if (!item.Template.CanSellOnRagfair)
 			{
 
 				if (displayWarning)
-					NotificationManagerClass.DisplayWarningNotification("Quicksell: Item is banned from flea market.");
+					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Товар запрещен к продаже на барахолке!");
 
 				return false;
 			}
@@ -126,7 +135,7 @@ namespace LootValue
 			{
 
 				if (displayWarning)
-					NotificationManagerClass.DisplayWarningNotification("Quicksell: Maximum number of flea offers reached.");
+					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Достигнуто максимальное количество предложений на барахолке!");
 
 				return false;
 			}
@@ -135,7 +144,7 @@ namespace LootValue
 			{
 
 				if (displayWarning)
-					NotificationManagerClass.DisplayWarningNotification("Quicksell: Item is not empty.");
+					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Предмет не пустой!");
 
 				return false;
 
@@ -145,7 +154,7 @@ namespace LootValue
 			{
 
 				if (displayWarning)
-					NotificationManagerClass.DisplayWarningNotification("Quicksell: Item contains banned fleamarket items.");
+					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Товар содержит запрещенные к продаже товары на барахолке!");
 
 				return false;
 			}
@@ -154,7 +163,7 @@ namespace LootValue
 			if (!item.CanSellOnRagfair)
 			{
 				if (displayWarning)
-					NotificationManagerClass.DisplayWarningNotification("Quicksell: Item can't be sold right now.");
+					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Товар не может быть продан прямо сейчас!");
 
 				return false;
 			}
@@ -167,16 +176,9 @@ namespace LootValue
 		{
 
 			bool sellMultipleEnabled = LootValueMod.SellSimilarItems.Value;
-			bool sellMultipleOnlyFiR = LootValueMod.SellOnlySimilarItemsFiR.Value;
 			bool isItemFindInRaid = item.MarkedAsSpawnedInSession;
 
 			if (!sellMultipleEnabled)
-			{
-				return false;
-			}
-
-
-			if (sellMultipleOnlyFiR && !isItemFindInRaid)
 			{
 				return false;
 			}
@@ -233,7 +235,8 @@ namespace LootValue
 
 			FleaRequirement[] offer = new FleaRequirement[1] { offerRequeriment };
 			Session.RagFair.AddOffer(false, itemIds, offer, null);
-		}
+            Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.TradeOperationComplete);
+        }
 
 
 	}
@@ -296,7 +299,7 @@ namespace LootValue
 				trader.GetSupplyData().CurrencyCourses[result.Value.CurrencyId],
 				item.StackObjectsCount
 			);
-		}
+        }
 
 		public static bool ShouldSellToTraderDueToPriceOrCondition(Item item)
 		{
@@ -312,13 +315,13 @@ namespace LootValue
 
 				if (bestTraderOffer == null)
 				{
-					NotificationManagerClass.DisplayWarningNotification("Quicksell Error: No trader will purchase this item.");
+					NotificationManagerClass.DisplayWarningNotification("Ошибка быстрой продажи: Ни один трейдер не купит этот предмет.");
 					return;
 				}
 
 				if (item.IsNotEmpty())
 				{
-					NotificationManagerClass.DisplayWarningNotification("Quicksell: item is not empty.");
+					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Предмет не пустой.");
 					return;
 				}
 

@@ -39,7 +39,7 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
-   <ItemGroup>
+  <ItemGroup>
     <Reference Include="0Harmony">
       <HintPath>..\..\..\BepInEx\core\0Harmony.dll</HintPath>
     </Reference>
@@ -117,9 +117,6 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>
-      copy "$(TargetPath)" "$(ProjectDir)\..\..\..\BepInEx\plugins\$(AssemblyName)\$(TargetFileName)"
-      copy "$(ProjectDir)\..\server\LootValueBackend\src\LootValueStaticRouter.ts" "$(ProjectDir)\..\..\..\user\mods\$(Author)-LootValueBackend\src\LootValueStaticRouter.ts"
-      echo "$(TargetPath)"
     </PostBuildEvent>
   </PropertyGroup>
 </Project>

@@ -75,7 +75,7 @@ namespace LootValue
 				bool applyConditionReduction = LootValueMod.ReducePriceInFleaForBrokenItem.Value;
 
 				int finalFleaPrice = FleaUtils.GetFleaMarketUnitPriceWithModifiers(item) * stackAmount;
-				bool canBeSoldToFlea = finalFleaPrice > 0;
+				bool canBeSoldToFlea = item.MarkedAsSpawnedInSession && finalFleaPrice > 0;
 
 				var finalTraderPrice = TraderUtils.GetBestTraderPrice(item);
 				bool canBeSoldToTrader = finalTraderPrice > 0;
@@ -90,13 +90,13 @@ namespace LootValue
 
 				bool isTraderPriceHigherThanFlea = finalTraderPrice > finalFleaPrice;
 				bool isFleaPriceHigherThanTrader = finalFleaPrice > finalTraderPrice;
-				bool sellToTrader = isTraderPriceHigherThanFlea;
-				bool sellToFlea = !sellToTrader;
+				bool sellToTrader = !item.MarkedAsSpawnedInSession;
+				bool sellToFlea = item.MarkedAsSpawnedInSession && isFleaPriceHigherThanTrader;
 
-				// If both trader and flea are 0, then the item is not purchasable.
-				if (!canBeSoldToTrader && !canBeSoldToFlea)
+                // If both trader and flea are 0, then the item is not purchasable.
+                if (!canBeSoldToTrader && !canBeSoldToFlea)
 				{
-					AppendFullLineToTooltip(ref text, "(Item can't be sold)", 11, "#AA3333");
+					AppendFullLineToTooltip(ref text, "(Товар не может быть продан)", 11, "#AA3333");
 					return;
 				}
 
@@ -118,15 +118,15 @@ namespace LootValue
 					sellToFlea = false;
 
 					var reason = GetReasonForItemToBeSoldToTrader(item);
-					AppendFullLineToTooltip(ref text, $"(Selling to <b>Trader</b> {reason})", 11, "#AAAA33");
+					AppendFullLineToTooltip(ref text, $"(Следует продать <b>Торговцу</b> {reason})", 11, "#AAAA33");
 				}
 
 				var showTraderPrice = true;
-				if (hideLowerPrice && isFleaPriceHigherThanTrader)
+				if (hideLowerPrice && item.MarkedAsSpawnedInSession && isFleaPriceHigherThanTrader)
 				{
 					showTraderPrice = false;
 				}
-				if (hideLowerPriceInRaid && isInRaid && isFleaPriceHigherThanTrader)
+				if (hideLowerPriceInRaid && item.MarkedAsSpawnedInSession && isInRaid && isFleaPriceHigherThanTrader)
 				{
 					showTraderPrice = false;
 				}
@@ -145,9 +145,10 @@ namespace LootValue
 				{
 					AppendNewLineToTooltipText(ref text);
 
-					// append trader price
-					var traderName = $"Trader: ";
-					var traderNameColor = sellToTrader ? "#ffffff" : "#444444";
+                    // append trader price
+                    //var traderName = $"Торговец: ";
+                    var traderName = $"{TraderUtils.GetBestTraderOffer(item).TraderName}: ";
+                    var traderNameColor = sellToTrader ? "#ffffff" : "#444444";
 					var traderPricePerSlotColor = sellToTrader ? SlotColoring.GetColorFromValuePerSlots(pricePerSlotTrader) : "#444444";
 					var fontSize = sellToTrader ? 14 : 10;
 
@@ -158,7 +159,7 @@ namespace LootValue
 
 					if (stackAmount > 1)
 					{
-						var unitPrice = $" (₽ {(finalTraderPrice / stackAmount).FormatNumber()} e.)";
+						var unitPrice = $" (₽ {(finalTraderPrice / stackAmount).FormatNumber()} шт.)";
 						AppendTextToToolip(ref text, unitPrice, "#333333");
 					}
 
@@ -167,11 +168,15 @@ namespace LootValue
 				}
 
 				var showFleaPrice = true;
-				if (hideLowerPrice && isTraderPriceHigherThanFlea)
+                if (!item.MarkedAsSpawnedInSession)
+                {
+                    showFleaPrice = false;
+                }
+                if (hideLowerPrice && item.MarkedAsSpawnedInSession && isTraderPriceHigherThanFlea)
 				{
 					showFleaPrice = false;
 				}
-				if (hideLowerPriceInRaid && isInRaid && isTraderPriceHigherThanFlea)
+				if (hideLowerPriceInRaid && item.MarkedAsSpawnedInSession && isInRaid && isTraderPriceHigherThanFlea)
 				{
 					showFleaPrice = false;
 				}
@@ -180,16 +185,17 @@ namespace LootValue
 					showFleaPrice = false;
 				}
 
+
 				// append flea price on the tooltip
 				if (showFleaPrice)
 				{
 					AppendNewLineToTooltipText(ref text);
 
 					// append flea price
-					var fleaName = $"Flea: ";
+					var fleaName = $"Барахолка: ";
 					var fleaNameColor = sellToFlea ? "#ffffff" : "#444444";
 					var fleaPricePerSlotColor = sellToFlea ? SlotColoring.GetColorFromValuePerSlots(pricePerSlotFlea) : "#444444";
-					var fontSize = sellToFlea ? 14 : 10;
+					var fontSize = sellToFlea ? 14 : 12;
 
 					StartSizeTag(ref text, fontSize);
 
@@ -208,7 +214,7 @@ namespace LootValue
 
 					if (stackAmount > 1)
 					{
-						var unitPrice = $" (₽ {FleaUtils.GetFleaMarketUnitPriceWithModifiers(item).FormatNumber()} e.)";
+						var unitPrice = $" (₽ {FleaUtils.GetFleaMarketUnitPriceWithModifiers(item).FormatNumber()} шт.)";
 						AppendTextToToolip(ref text, unitPrice, "#333333");
 					}
 
@@ -219,7 +225,7 @@ namespace LootValue
 					{
 						if (FleaUtils.ContainsNonFleableItemsInside(item))
 						{
-							AppendFullLineToTooltip(ref text, "(Contains banned flea items inside)", 11, "#AA3333");
+							AppendFullLineToTooltip(ref text, "(Содержит внутри предметы запрещенные на барахолке)", 11, "#AA3333");
 							canBeSoldToFlea = false;
 						}
 
@@ -227,12 +233,12 @@ namespace LootValue
 
 				}
 
-				if(fleaPricesForWeaponMods > 0) {
+				if(item.MarkedAsSpawnedInSession && fleaPricesForWeaponMods > 0) {
 					AppendNewLineToTooltipText(ref text);
 					var color = SlotColoring.GetColorFromTotalValue(fleaPricesForWeaponMods);
 					StartSizeTag(ref text, 12);
 					AppendTextToToolip(ref text, $"₽ {fleaPricesForWeaponMods.FormatNumber()} ", color);
-					AppendTextToToolip(ref text, $"in parts (flea)", "#555555");
+					AppendTextToToolip(ref text, $"по частям (на Барахолке)", "#555555");
 					EndSizeTag(ref text);
 				}
 
@@ -240,7 +246,7 @@ namespace LootValue
 				{
 					if (!isItemEmpty)
 					{
-						AppendFullLineToTooltip(ref text, "(Item is not empty)", 11, "#AA3333");
+						AppendFullLineToTooltip(ref text, "(Предмет не пуст)", 11, "#AA3333");
 						canBeSoldToFlea = false;
 						canBeSoldToTrader = false;
 					}
@@ -249,7 +255,7 @@ namespace LootValue
 				var shouldShowFleaMarketEligibility = LootValueMod.ShowFleaMarketEligibility.Value;
 				if (shouldShowFleaMarketEligibility && !item.Template.CanSellOnRagfair)
 				{
-					AppendFullLineToTooltip(ref text, "(Item is banned from flea market)", 11, "#AA3333");
+					AppendFullLineToTooltip(ref text, "(Товар запрещен к продаже на барахолке)", 11, "#AA3333");
 				}
 
 				var shouldShowPricePerSlotAndPerKgInRaid = LootValueMod.ShowPricePerKgAndPerSlotInRaid.Value;
@@ -261,20 +267,22 @@ namespace LootValue
 					var pricePerWeight = (int)(unitPrice / item.GetSingleItemTotalWeight());
 
 					AppendSeparator(ref text);
-					StartSizeTag(ref text, 11);
-					AppendTextToToolip(ref text, $"₽ / KG\t{pricePerWeight.FormatNumber()}", "#555555");
+					StartSizeTag(ref text, 12);
+					AppendTextToToolip(ref text, $"₽/КГ: {pricePerWeight.FormatNumber()}", "#555555");
 					AppendNewLineToTooltipText(ref text);
-					AppendTextToToolip(ref text, $"₽ / SLOT\t{pricePerSlot.FormatNumber()}", "#555555");
+					AppendTextToToolip(ref text, $"₽/СЛОТ: {pricePerSlot.FormatNumber()}", "#555555");
 					EndSizeTag(ref text);
 
 				}
 
 
 				bool quickSellEnabled = LootValueMod.EnableQuickSell.Value;
-				bool quickSellUsesOneButton = LootValueMod.OneButtonQuickSell.Value;
-				bool showQuickSaleCommands = quickSellEnabled && !isInRaid;
+                bool quickSellEnabledHint = LootValueMod.EnableQuickSellHint.Value;
+                bool quickSellUsesOneButton = LootValueMod.OneButtonQuickSell.Value;
+                bool showQuickSaleCommands = quickSellEnabled && quickSellEnabledHint && !isInRaid;
+                bool showQuickSaleCommandsadds = quickSellEnabled && !quickSellEnabledHint && !isInRaid;
 
-				if (showQuickSaleCommands)
+                if (showQuickSaleCommands)
 				{
 					if (quickSellUsesOneButton)
 					{
@@ -285,7 +293,7 @@ namespace LootValue
 						if (canBeSold)
 						{
 							AppendSeparator(ref text);
-							AppendTextToToolip(ref text, $"Sell with Alt+Shift+Click", "#888888");
+							AppendTextToToolip(ref text, $"Продать с помощью Alt+Shift+Click", "#888888");
 							if (canBeSoldToFlea && sellToFlea)
 							{
 								AddMultipleItemsSaleSection(ref text, item);
@@ -302,7 +310,7 @@ namespace LootValue
 
 						if (canBeSoldToTrader)
 						{
-							AppendTextToToolip(ref text, $"Sell to Trader with Alt+Shift+Left Click", "#888888");
+							AppendTextToToolip(ref text, $"Продать трейдеру с помощью Alt+Shift+Left Click", "#888888");
 						}
 
 						if (canBeSoldToFlea && canBeSoldToTrader)
@@ -312,15 +320,23 @@ namespace LootValue
 
 						if (canBeSoldToFlea)
 						{
-							AppendTextToToolip(ref text, $"Sell to Flea with Alt+Shift+Right Click", "#888888");
+							AppendTextToToolip(ref text, $"Продать на Барахолке с помощью Alt+Shift+Right Click", "#888888");
 							AddMultipleItemsSaleSection(ref text, item);
 						}
 					}
 
 				}
 
+				if (showQuickSaleCommandsadds)
+				{
+                    if (canBeSoldToFlea)
+                    {
+                        AddMultipleItemsSaleSection(ref text, item);
+                    }
+                }
 
-			}
+
+            }
 
 			private static void AddMultipleItemsSaleSection(ref string text, Item item)
 			{
@@ -332,7 +348,7 @@ namespace LootValue
 					if (amountOfItems > 1)
 					{
 						var totalPrice = FleaUtils.GetTotalPriceOfAllSimilarItemsWithinSameContainer(item);
-						AppendFullLineToTooltip(ref text, $"(Will sell {amountOfItems} similar items for ₽ {totalPrice.FormatNumber()})", 10, "#555555");
+						AppendFullLineToTooltip(ref text, $"(Будет продано {amountOfItems} аналогичных товаров за ₽ {totalPrice.FormatNumber()})", 10, "#555555");
 					}
 
 				}
@@ -343,17 +359,17 @@ namespace LootValue
 				var flags = DurabilityOrProfitConditionFlags.GetDurabilityOrProfitConditionFlagsForItem(item);
 				if (flags.shouldSellToTraderDueToBeingNonOperational)
 				{
-					return "due to being non operational";
+					return "из-за того, что предмет не работает";
 				}
 				else if (flags.shouldSellToTraderDueToDurabilityThreshold)
 				{
-					return "due to low durability";
+					return "из-за низкой прочности";
 				}
 				else if (flags.shouldSellToTraderDueToProfitThreshold)
 				{
-					return "due to low flea profit";
+					return "из-за низкой прибыли от барахолки";
 				}
-				return "due to no reason :)";
+				return "без всякой причины :)";
 			}
 
 		}
