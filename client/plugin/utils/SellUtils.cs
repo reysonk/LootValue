@@ -107,7 +107,7 @@ namespace LootValue
 			{
 
 				if (displayWarning)
-					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Барахолка пока недоступна!");
+					NotificationManagerClass.DisplayWarningNotification("Р‘С‹СЃС‚СЂР°СЏ РїСЂРѕРґР°Р¶Р°: Р‘Р°СЂР°С…РѕР»РєР° РїРѕРєР° РЅРµРґРѕСЃС‚СѓРїРЅР°!");
 
 				return false;
 			}
@@ -116,7 +116,7 @@ namespace LootValue
             {
 
                 if (displayWarning)
-                    NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Предмет не найден в рейде, продажа недоступна!");
+                    NotificationManagerClass.DisplayWarningNotification("Р‘С‹СЃС‚СЂР°СЏ РїСЂРѕРґР°Р¶Р°: РџСЂРµРґРјРµС‚ РЅРµ РЅР°Р№РґРµРЅ РІ СЂРµР№РґРµ, РїСЂРѕРґР°Р¶Р° РЅРµРґРѕСЃС‚СѓРїРЅР°!");
 
                 return false;
             }
@@ -126,7 +126,7 @@ namespace LootValue
 			{
 
 				if (displayWarning)
-					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Предмет запрещен к продаже на барахолке!");
+					NotificationManagerClass.DisplayWarningNotification("Р‘С‹СЃС‚СЂР°СЏ РїСЂРѕРґР°Р¶Р°: РџСЂРµРґРјРµС‚ Р·Р°РїСЂРµС‰РµРЅ Рє РїСЂРѕРґР°Р¶Рµ РЅР° Р±Р°СЂР°С…РѕР»РєРµ!");
 
 				return false;
 			}
@@ -135,7 +135,7 @@ namespace LootValue
 			{
 
 				if (displayWarning)
-					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Достигнуто максимальное количество предложений на барахолке!");
+					NotificationManagerClass.DisplayWarningNotification("Р‘С‹СЃС‚СЂР°СЏ РїСЂРѕРґР°Р¶Р°: Р”РѕСЃС‚РёРіРЅСѓС‚Рѕ РјР°РєСЃРёРјР°Р»СЊРЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ РїСЂРµРґР»РѕР¶РµРЅРёР№ РЅР° Р±Р°СЂР°С…РѕР»РєРµ!");
 
 				return false;
 			}
@@ -144,7 +144,7 @@ namespace LootValue
 			{
 
 				if (displayWarning)
-					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Предмет не пустой!");
+					NotificationManagerClass.DisplayWarningNotification("Р‘С‹СЃС‚СЂР°СЏ РїСЂРѕРґР°Р¶Р°: РџСЂРµРґРјРµС‚ РЅРµ РїСѓСЃС‚РѕР№!");
 
 				return false;
 
@@ -154,7 +154,7 @@ namespace LootValue
 			{
 
 				if (displayWarning)
-					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Предмет содержит запрещенные к продаже товары на барахолке!");
+					NotificationManagerClass.DisplayWarningNotification("Р‘С‹СЃС‚СЂР°СЏ РїСЂРѕРґР°Р¶Р°: РџСЂРµРґРјРµС‚ СЃРѕРґРµСЂР¶РёС‚ Р·Р°РїСЂРµС‰РµРЅРЅС‹Рµ Рє РїСЂРѕРґР°Р¶Рµ С‚РѕРІР°СЂС‹ РЅР° Р±Р°СЂР°С…РѕР»РєРµ!");
 
 				return false;
 			}
@@ -163,7 +163,7 @@ namespace LootValue
 			if (!item.CanSellOnRagfair)
 			{
 				if (displayWarning)
-					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Предмет не может быть продан прямо сейчас!");
+					NotificationManagerClass.DisplayWarningNotification("Р‘С‹СЃС‚СЂР°СЏ РїСЂРѕРґР°Р¶Р°: РџСЂРµРґРјРµС‚ РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РїСЂРѕРґР°РЅ РїСЂСЏРјРѕ СЃРµР№С‡Р°СЃ!");
 
 				return false;
 			}
@@ -334,13 +334,13 @@ namespace LootValue
 
 				if (bestTraderOffer == null)
 				{
-					NotificationManagerClass.DisplayWarningNotification("Ошибка быстрой продажи: Ни один трейдер не купит этот предмет.");
+					NotificationManagerClass.DisplayWarningNotification("РћС€РёР±РєР° Р±С‹СЃС‚СЂРѕР№ РїСЂРѕРґР°Р¶Рё: РќРё РѕРґРёРЅ С‚СЂРµР№РґРµСЂ РЅРµ РєСѓРїРёС‚ СЌС‚РѕС‚ РїСЂРµРґРјРµС‚.");
 					return;
 				}
 
 				if (item.IsNotEmpty())
 				{
-					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Предмет не пустой.");
+					NotificationManagerClass.DisplayWarningNotification("Р‘С‹СЃС‚СЂР°СЏ РїСЂРѕРґР°Р¶Р°: РџСЂРµРґРјРµС‚ РЅРµ РїСѓСЃС‚РѕР№.");
 					return;
 				}
 
