@@ -32,7 +32,7 @@ namespace LootValue
 		public static int GetFleaValue(Item item)
 		{
 
-			if (!item.Template.CanSellOnRagfair)
+			if (!item.Template.CanSellOnRagfair || !item.MarkedAsSpawnedInSession)
 			{
 				return 0;
 			}
@@ -126,7 +126,7 @@ namespace LootValue
 			{
 
 				if (displayWarning)
-					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Товар запрещен к продаже на барахолке!");
+					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Предмет запрещен к продаже на барахолке!");
 
 				return false;
 			}
@@ -154,7 +154,7 @@ namespace LootValue
 			{
 
 				if (displayWarning)
-					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Товар содержит запрещенные к продаже товары на барахолке!");
+					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Предмет содержит запрещенные к продаже товары на барахолке!");
 
 				return false;
 			}
@@ -163,7 +163,7 @@ namespace LootValue
 			if (!item.CanSellOnRagfair)
 			{
 				if (displayWarning)
-					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Товар не может быть продан прямо сейчас!");
+					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Предмет не может быть продан прямо сейчас!");
 
 				return false;
 			}
@@ -256,7 +256,7 @@ namespace LootValue
 			return offer.Price;
 		}
 
-		public static TraderOffer GetBestTraderOffer(Item item)
+        public static TraderOffer GetBestTraderOffer(Item item)
 		{
 			if (!Session.Profile.Examined(item))
 			{
@@ -301,7 +301,26 @@ namespace LootValue
 			);
         }
 
-		public static bool ShouldSellToTraderDueToPriceOrCondition(Item item)
+        public static int GetTraderValue(IEnumerable<Item> items)
+        {
+
+            return items.Select(item => GetTraderValue(item)).Sum();
+        }
+
+        public static int GetTraderValue(Item item)
+        {
+
+            if (item.Template.CanSellOnRagfair || item.MarkedAsSpawnedInSession)
+            {
+                return 0;
+            }
+
+            var price = GetBestTraderOffer(item).Price;
+
+            return (int) price;
+        }
+
+        public static bool ShouldSellToTraderDueToPriceOrCondition(Item item)
 		{
 			var flags = DurabilityOrProfitConditionFlags.GetDurabilityOrProfitConditionFlagsForItem(item);
 			return flags.shouldSellToTraderDueToBeingNonOperational || flags.shouldSellToTraderDueToDurabilityThreshold || flags.shouldSellToTraderDueToProfitThreshold;
@@ -354,8 +373,7 @@ namespace LootValue
 
 	}
 
-
-	public sealed class TraderOffer
+		public sealed class TraderOffer
 	{
 		public string TraderId;
 		public string TraderName;
