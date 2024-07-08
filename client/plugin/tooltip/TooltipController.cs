@@ -87,11 +87,10 @@ namespace LootValue
 				int pricePerSlotTrader = finalTraderPrice / slots;
 				int pricePerSlotFlea = finalFleaPrice / slots;
 
-
-				bool isTraderPriceHigherThanFlea = finalTraderPrice > finalFleaPrice;
-				bool isFleaPriceHigherThanTrader = finalFleaPrice > finalTraderPrice;
-				bool sellToTrader = !item.MarkedAsSpawnedInSession;
-				bool sellToFlea = item.MarkedAsSpawnedInSession && isFleaPriceHigherThanTrader;
+                bool isFleaPriceHigherThanTrader = finalFleaPrice > finalTraderPrice;
+                bool isTraderPriceHigherThanFlea = finalTraderPrice > finalFleaPrice;
+				bool sellToFlea = item.MarkedAsSpawnedInSession & item.Template.CanSellOnRagfair & isFleaPriceHigherThanTrader;
+                bool sellToTrader = !sellToFlea;
 
                 // If both trader and flea are 0, then the item is not purchasable.
                 if (!canBeSoldToTrader && !canBeSoldToFlea)
@@ -150,7 +149,7 @@ namespace LootValue
                     var traderName = $"{TraderUtils.GetBestTraderOffer(item).TraderName}: ";
                     var traderNameColor = sellToTrader ? "#ffffff" : "#444444";
 					var traderPricePerSlotColor = sellToTrader ? SlotColoring.GetColorFromValuePerSlots(pricePerSlotTrader) : "#444444";
-					var fontSize = sellToTrader ? 14 : 10;
+					var fontSize = sellToTrader ? 14 : 12;
 
 					StartSizeTag(ref text, fontSize);
 
@@ -238,7 +237,7 @@ namespace LootValue
 					var color = SlotColoring.GetColorFromTotalValue(fleaPricesForWeaponMods);
 					StartSizeTag(ref text, 12);
 					AppendTextToToolip(ref text, $"₽ {fleaPricesForWeaponMods.FormatNumber()} ", color);
-					AppendTextToToolip(ref text, $"по частям (на Барахолке)", "#555555");
+					AppendTextToToolip(ref text, $"стоимость обвеса (на Барахолке)", "#555555");
 					EndSizeTag(ref text);
 				}
 
@@ -266,10 +265,13 @@ namespace LootValue
 					var unitPrice = sellToTrader ? (finalTraderPrice / stackAmount) : FleaUtils.GetFleaMarketUnitPriceWithModifiers(item);
 					var pricePerWeight = (int)(unitPrice / item.GetSingleItemTotalWeight());
 
-					AppendSeparator(ref text);
+
+                    AppendSeparator(ref text);
 					StartSizeTag(ref text, 12);
-					AppendTextToToolip(ref text, $"₽/КГ: {pricePerWeight.FormatNumber()}", "#555555");
-					AppendNewLineToTooltipText(ref text);
+					if (pricePerWeight > 0) {
+                        AppendTextToToolip(ref text, $"₽/КГ: {pricePerWeight.FormatNumber()}", "#555555");
+                        AppendNewLineToTooltipText(ref text);
+                    }
 					AppendTextToToolip(ref text, $"₽/СЛОТ: {pricePerSlot.FormatNumber()}", "#555555");
 					EndSizeTag(ref text);
 
