@@ -7,6 +7,7 @@ using Aki.Reflection.Utils;
 using Comfort.Common;
 using EFT.InventoryLogic;
 using EFT.UI;
+using UnityEngine;
 using CurrencyUtil = GClass2517;
 using FleaRequirement = GClass1844;
 
@@ -32,8 +33,8 @@ namespace LootValue
 		public static int GetFleaValue(Item item)
 		{
 
-			if (!item.Template.CanSellOnRagfair)
-			{
+            if (!item.Template.CanSellOnRagfair || !item.MarkedAsSpawnedInSession)
+            {
 				return 0;
 			}
 
@@ -107,17 +108,26 @@ namespace LootValue
 			{
 
 				if (displayWarning)
-					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Барахолка пока недоступна.");
+					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Барахолка пока недоступна!");
 
 				return false;
 			}
 
-			// we need to check if the base item is sellable
-			if (!item.Template.CanSellOnRagfair)
+            if (!item.MarkedAsSpawnedInSession)
+            {
+
+                if (displayWarning)
+                    NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Предмет не найден в рейде, продажа недоступна!");
+
+                return false;
+            }
+
+            // we need to check if the base item is sellable
+            if (!item.Template.CanSellOnRagfair)
 			{
 
 				if (displayWarning)
-					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Товар запрещен к продаже на барахолке.");
+					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Предмет запрещен к продаже на барахолке!");
 
 				return false;
 			}
@@ -126,7 +136,7 @@ namespace LootValue
 			{
 
 				if (displayWarning)
-					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Достигнуто максимальное количество предложений на барахолке.");
+					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Достигнуто максимальное количество предложений на барахолке!");
 
 				return false;
 			}
@@ -135,7 +145,7 @@ namespace LootValue
 			{
 
 				if (displayWarning)
-					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Предмет не пустой.");
+					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Предмет не пустой!");
 
 				return false;
 
@@ -145,7 +155,7 @@ namespace LootValue
 			{
 
 				if (displayWarning)
-					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Товар содержит запрещенные к продаже товары на барахолке.");
+					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Предмет содержит запрещенные к продаже товары на барахолке!");
 
 				return false;
 			}
@@ -154,7 +164,7 @@ namespace LootValue
 			if (!item.CanSellOnRagfair)
 			{
 				if (displayWarning)
-					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Товар не может быть продан прямо сейчас.");
+					NotificationManagerClass.DisplayWarningNotification("Быстрая продажа: Предмет не может быть продан прямо сейчас!");
 
 				return false;
 			}
@@ -166,17 +176,12 @@ namespace LootValue
 		public static bool CanSellMultipleOfItem(Item item)
 		{
 
-			bool sellMultipleEnabled = LootValueMod.SellSimilarItems.Value;
-			bool sellMultipleOnlyFiR = LootValueMod.SellOnlySimilarItemsFiR.Value;
-			bool isItemFindInRaid = item.MarkedAsSpawnedInSession;
-
-			if (!sellMultipleEnabled)
-			{
-				return false;
-			}
+			//bool sellMultipleEnabled = LootValueMod.SellSimilarItems.Value;
+			//bool isItemFindInRaid = item.MarkedAsSpawnedInSession;
+			bool sellMultiplePossible = (LootValueMod.SellSimilarItems.Value && (Input.GetKey(KeyCode.LeftControl) & Input.GetKey(KeyCode.LeftShift) & Input.GetKey(KeyCode.LeftAlt)));
 
 
-			if (sellMultipleOnlyFiR && !isItemFindInRaid)
+            if (!sellMultiplePossible)
 			{
 				return false;
 			}
@@ -233,7 +238,8 @@ namespace LootValue
 
 			FleaRequirement[] offer = new FleaRequirement[1] { offerRequeriment };
 			Session.RagFair.AddOffer(false, itemIds, offer, null);
-		}
+            Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.TradeOperationComplete);
+        }
 
 
 	}
@@ -253,7 +259,7 @@ namespace LootValue
 			return offer.Price;
 		}
 
-		public static TraderOffer GetBestTraderOffer(Item item)
+        public static TraderOffer GetBestTraderOffer(Item item)
 		{
 			if (!Session.Profile.Examined(item))
 			{
@@ -296,9 +302,28 @@ namespace LootValue
 				trader.GetSupplyData().CurrencyCourses[result.Value.CurrencyId],
 				item.StackObjectsCount
 			);
-		}
+        }
 
-		public static bool ShouldSellToTraderDueToPriceOrCondition(Item item)
+        public static int GetTraderValue(IEnumerable<Item> items)
+        {
+
+            return items.Select(item => GetTraderValue(item)).Sum();
+        }
+
+        public static int GetTraderValue(Item item)
+        {
+
+            if (item.MarkedAsSpawnedInSession && item.Template.CanSellOnRagfair)
+            {
+                return 0;
+            }
+
+            var price = GetBestTraderOffer(item).Price;
+
+            return (int) price;
+        }
+
+        public static bool ShouldSellToTraderDueToPriceOrCondition(Item item)
 		{
 			var flags = DurabilityOrProfitConditionFlags.GetDurabilityOrProfitConditionFlagsForItem(item);
 			return flags.shouldSellToTraderDueToBeingNonOperational || flags.shouldSellToTraderDueToDurabilityThreshold || flags.shouldSellToTraderDueToProfitThreshold;
@@ -351,8 +376,7 @@ namespace LootValue
 
 	}
 
-
-	public sealed class TraderOffer
+		public sealed class TraderOffer
 	{
 		public string TraderId;
 		public string TraderName;
